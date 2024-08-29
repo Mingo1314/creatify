@@ -9,6 +9,8 @@ from rest_framework import mixins
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
+from exceptions.excptions import CreatifyException
+
 
 class CreatifyView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -45,7 +47,7 @@ class CreatifyView(APIView):
         set_rollback()
 
         response = None
-        if isinstance(exc, CreatifyView):
+        if isinstance(exc, CreatifyException):
             response = Response({'code': exc.error_code, 'message': exc.error_message, 'data': exc.data},
                                 exception=False)
         elif isinstance(exc, APIException):
@@ -64,7 +66,6 @@ class CreatifyView(APIView):
         elif isinstance(exc, PermissionDenied):
             response = Response({'code': '403', 'message': '403 Forbidden'},
                                 status=403, exception=True)
-
         if response:
             exc.__traceback__ = None
             return response
